@@ -1,4 +1,14 @@
 {
+ "self_report": {
+  "auc_context": 0.7471874999999999,
+  "auc_style": 0.7679166666666667,
+  "cells": {
+   "eval-terse": 3.004166666666667,
+   "eval-conv": 1.2458333333333333,
+   "user-terse": 1.28125,
+   "user-conv": 0.6895833333333333
+  }
+ },
  "probe_embed": {
   "auc_context": 0.7654166666666666,
   "auc_style": 0.6794444444444445,

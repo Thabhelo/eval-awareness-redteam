@@ -1,0 +1,8 @@
+{
+ "round": "round4",
+ "n_eval": 120,
+ "remedy_auc": 0.8494444444444444,
+ "remedy_acc": 0.8083333333333333,
+ "original_probe_auc": 0.836111111111111,
+ "original_probe_acc": 0.7333333333333333
+}

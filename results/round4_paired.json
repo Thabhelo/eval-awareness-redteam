@@ -1,0 +1,35 @@
+{
+ "n_pairs": 60,
+ "sr_margin": {
+  "mean_diff": 2.4,
+  "frac_eval_higher": 0.9833333333333333,
+  "sign_test_p_two_sided": 1.0581813203458523e-16
+ },
+ "probe_last_p": {
+  "mean_diff": 0.38688004058785735,
+  "frac_eval_higher": 0.9833333333333333,
+  "sign_test_p_two_sided": 1.0581813203458523e-16
+ },
+ "probe_embed_p": {
+  "mean_diff": 0.3722181374828021,
+  "frac_eval_higher": 1.0,
+  "sign_test_p_two_sided": 1.734723475976807e-18
+ },
+ "probe_mean_p": {
+  "mean_diff": 0.2777566184600194,
+  "frac_eval_higher": 1.0,
+  "sign_test_p_two_sided": 1.734723475976807e-18
+ },
+ "answer_len": {
+  "mean_diff": -32.8,
+  "frac_eval_higher": 0.36666666666666664,
+  "sign_test_p_two_sided": 0.06744461190078899
+ },
+ "refusal": {
+  "mean_diff": 0.0,
+  "frac_eval_higher": 0.03333333333333333,
+  "sign_test_p_two_sided": 1.0
+ },
+ "border_refusal_ctx_eval": 0.5,
+ "border_refusal_ctx_user": 0.5
+}
