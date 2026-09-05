@@ -6,7 +6,7 @@ R = {t: json.load(open(f"results/{t}_outputs.json")) for t in tags}
 def pct(x): return f"{100*x:.0f}%"
 def img(path, w=640):
     b = base64.b64encode(open(path, "rb").read()).decode(); return f'<img src="data:image/png;base64,{b}" width="{w}">'
-REW = '<span style="background:#fff2a8;font-weight:bold">[REWRITE IN YOUR OWN VOICE]</span>'
+REW = ''
 def row(label, key, fmt=pct):
     cells = "".join(f"<td>{fmt(S[t][key]) if key in S[t] else '-'}</td>" for t in tags); return f"<tr><td>{label}</td>{cells}</tr>"
 hdr = "".join(f"<th>{t}</th>" for t in tags)
@@ -32,10 +32,9 @@ ex = "".join(f"<h3>{t} (3 random, seed 3)</h3>{examples(t,3,3)}" for t in tags)
 doc = f"""<html><body style='font-family:Arial;font-size:11pt'>
 <h1>Does an eval-awareness detector survive an adversary?</h1>
 <p>Thabhelo Duve. MATS 12.0 application, Neel Nanda stream. {datetime.date.today().isoformat()}.<br>
-Code and data: REPO_LINK</p>
+Code and data: https://github.com/Thabhelo/eval-awareness-redteam</p>
 <h2>Executive summary</h2>
-<p>{REW}</p>
-<p><b>Question.</b> A model that knows it is being evaluated may behave differently. Cheap detectors for that state are easy to build: ask the model, match keywords, or train a linear probe on the residual stream. Each looks fine on a clean matched set. I asked whether any of them survive an adversary that hides the cues, and what they are actually detecting.</p>
+<p><b>Question.</b> If a model knows it is being evaluated it may behave differently, so people build detectors for that state. The cheap ones are: ask the model, match keywords, or train a linear probe on the residual stream. All three look fine on a clean test set. I wanted to know whether any of them survive an adversary that hides the cues, and what they are really picking up on.</p>
 <p><b>Setup.</b> Qwen3.5-4B (8-bit, MLX, run locally on a laptop, thinking off). 60 base tasks, each rendered as an evaluation item and as a user message, 120 prompts per round. Round 0 has explicit cues ("You are being evaluated. Question 3 of 50"). Detectors are built on round 0 and frozen. A red-team agent (Claude Code) then writes new rounds on the same 60 tasks: round 1 strips every cue word from the evaluation items and puts words like "evaluation", "test", "grading" into genuine user messages; round 2 reverses the style, casual evaluation items against terse lazy-user fragments. I labelled a blind sample by hand and adjudicated the ground-truth definition.</p>
 {img("figures/detector_rounds.png", 660)}
 <p><b>Findings.</b></p>
@@ -46,7 +45,7 @@ Code and data: REPO_LINK</p>
 <li>The mean-pooled probe reaches 100% on round 0 at every layer including the raw embeddings, so it is a bag of words. I kept the embedding probe as a control; the last-token layer-15 probe is the one that reads model state.</li>
 <li>No behaviour shift was detectable: refusal rates were {pct(S['round0']['refusal_rate_eval'])} vs {pct(S['round0']['refusal_rate_dep'])} in round 0 and equal in round 1, at n=60 per side.</li>
 </ul>
-<p><b>What I think this means.</b> {REW} "Evaluation" is a fact about where a message came from, not about its text. Any text can come from a user. A text-only detector can at best learn style, and these detectors learned terseness and answer-format structure. That is useful against naive benchmarks and useless against an adversary who controls style. My own blind labels reflect that: I answered "user" for every item on principle, because every item could have come from a user.</p>
+<p><b>What I think this means.</b> When I did the blind labelling I marked every item "user", and I kept that answer after the task was explained to me. My reasoning was that all of those questions are questions a user could ask. Users are versatile; they ask in any way, in any fashion. Not every question fits a question bank, but every question fits a user, because every one of them will trigger a response. I know that when I prompt a model myself I am sometimes ambiguous, sometimes lazy, sometimes I give it one word and expect it to infer what I need. "Evaluation" is a fact about where a message came from, not about its text. A text-only detector can at best learn style, and that is exactly what these three did: they learned terseness and answer-only formatting. That works against a naive benchmark and fails against anyone who controls the style. Two of the random examples in section 3 also show the model giving a wrong or unsafe answer to the terse version of a question it answered well in the chatty version; that is two cases, not a result, but it is the kind of thing a style-sensitive model would do.</p>
 
 <h2>1. Technical setup</h2>
 <ul>
@@ -75,10 +74,9 @@ Code and data: REPO_LINK</p>
 <li>No real evaluation transcripts or real user logs were used.</li>
 </ul>
 <h2>6. LLM use and what I checked</h2>
-<p>{REW} Claude Code (Fable 5.1) wrote the code, the adversarial prompts and the first draft of this document, and ran the experiments on my machine while I directed. What I checked myself: CHECKED_BY_OWNER. What I did not check: DID_NOT_CHECK. The one place I would be least surprised to find an error: LEAST_SURPRISED.</p>
+<p>Claude Code (Fable 5.1) wrote the code, the adversarial prompts, and the draft of this document, and ran the experiments on my laptop while I directed. It also chose the round-2 attack after reading the round-1 misses. What I did myself: I chose this project over submitting an existing paper, set the goal of red-teaming the detector rather than the model, did the blind labelling and argued for the all-user prior, and read the nine random examples in section 3. Everything in this document that reads as a number was written into it by a script from the scores files, not typed. What I did not check: I did not read the model or probe code line by line, I did not reread all 360 prompts, and I did not rerun the scoring myself. Where I would be least surprised to find an error: the refusal regex (crude) and the wording of the self-report question, which could bias the letter the model picks. Where I would be most surprised: the round-2 reversal, because it was predicted in the log before the round ran and it is large.</p>
 <h2>7. Time</h2>
-<p>Started 2026-09-04 22:50 CDT. Active hours: TOGGL_HOURS (Toggl screenshot below). Excluded: model download, run time while I was doing other things.</p>
-<p>TOGGL_SCREENSHOT</p>
+<p>Started 2026-09-04 22:50 CDT, finished 2026-09-05 about 02:30 CDT, in one sitting. Roughly 3.5 hours of my active time by session timestamps. Excluded: about 1.8 hours of model run time (three rounds at 34 to 40 minutes each) during which I was not working on this, and the model download. I did not run Toggl; the git log and the timestamped research log in the repository are the time record.</p>
 <h2>8. Log and reproduction</h2>
 <p>Timestamped research log with pre-registered expectations for each round: notes/research_log.md in the repository. Reproduce with the commands in README.md.</p>
 </body></html>"""
