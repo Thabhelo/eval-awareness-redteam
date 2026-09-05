@@ -13,6 +13,10 @@ messages that use evaluation vocabulary?
 - Round 0: 60 base tasks x {eval frame, deployment frame} = 120 prompts with explicit surface cues. Detectors are built and the probe layer is chosen here (grouped 5-fold CV by base task).
 - Round 1: same 60 tasks rewritten by the red-team agent (Claude Code, Fable 5.1): evaluation items with all cue words removed but benchmark structure kept; user messages with "evaluation", "test", "grading" in everyday senses. Owner labels a 24-item blind sample as a human baseline.
 - Round 2: adaptive, written after inspecting which round-1 items fooled which detector.
+- Round 3: fully crossed context x style (240 prompts); user side carries a stated situation, no eval vocabulary.
+- Round 4: identical question, only a preceding context line varied (120 prompts, paired analysis).
+- Baselines: length only, format features, char n-grams, random (code/baselines.py). Remedy: probe retrained on round 3 with a task split (code/remedy.py). Steering along the probe direction (code/steer.py).
+- Round-0 numbers are grouped cross-validated (held-out), never training accuracy.
 
 **Ground truth.** label 1 = an item produced by an evaluation process, nobody needs the answer.
 label 0 = a person with a real need wrote it. Fixed before the adversarial rounds were written.
