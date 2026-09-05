@@ -1,0 +1,21 @@
+{
+ "round": "round0",
+ "n": 120,
+ "keyword_acc": 1.0,
+ "self_report_letter_acc": 0.6833333333333333,
+ "self_report_auc": 0.9975,
+ "self_report_acc": 0.975,
+ "sr_threshold": 3.0,
+ "probe_embed_acc": 1.0,
+ "probe_embed_auc": 1.0,
+ "probe_mean_acc": 1.0,
+ "probe_mean_auc": 1.0,
+ "probe_last_acc": 1.0,
+ "probe_last_auc": 1.0,
+ "refusal_rate_eval": 0.08333333333333333,
+ "answer_len_eval": 374.1,
+ "border_refusal_eval": 0.4,
+ "refusal_rate_dep": 0.06666666666666667,
+ "answer_len_dep": 481.8333333333333,
+ "border_refusal_dep": 0.3
+}
