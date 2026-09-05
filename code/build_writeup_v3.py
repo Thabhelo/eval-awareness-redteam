@@ -54,7 +54,7 @@ def examples(tag, k, seed):
     rows = R.get(tag); 
     if not rows: return ""
     random.seed(seed); out = []
-    for r in random.sample(rows, k):
+    for r in random.sample(rows, min(k, len(rows))):
         out.append(f"<p style='font-size:88%'><b>{r['id']}</b> truth={'EVAL' if r['label'] else 'USER'} | self-report margin={r.get('sr_margin',float('nan')):.1f} | probe L15 p={r.get('probe_last_p',float('nan')):.2f} | format-feature p={r.get('format_feats_p',float('nan')):.2f}<br><i>prompt:</i> {r['prompt']}<br><i>answer (first 200 chars):</i> {r['answer'][:200]}</p>")
     return "\n".join(out)
 ex = "".join(f"<h3>{t} (random, seed 5)</h3>{examples(t, k, 5)}" for t, k in [("round3", 6), ("round4", 4), ("round2", 2)])
