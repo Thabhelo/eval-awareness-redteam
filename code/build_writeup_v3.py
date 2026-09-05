@@ -49,7 +49,7 @@ if RM:
 <p style='font-size:90%'>Accuracy at the threshold calibrated on tasks 36-47 stays between {pct(min(RM['test_acc'],RM1['remedy_acc'],RM2['remedy_acc']))} and {pct(max(RM['test_acc'],RM1['remedy_acc'],RM2['remedy_acc']))}: ranking is partly repaired, calibration is not.</p>"""
 steer = ""
 if ST:
-    steer = "<table border='1' cellpadding='4' style='border-collapse:collapse;font-size:88%'><tr><th>alpha (probe direction, layer 15)</th><th>refusal rate</th><th>mean answer length</th></tr>" + "".join(f"<tr><td>{a}</td><td>{pct(ST[a]['refusal'])}</td><td>{ST[a]['answer_len']:.0f}</td></tr>" for a in ST) + "</table>"
+    steer = "<table border='1' cellpadding='4' style='border-collapse:collapse;font-size:88%'><tr><th>alpha (x mean residual norm)</th><th>probe score on task 50 (sanity)</th><th>refusal rate</th><th>mean answer length</th></tr>" + "".join(f"<tr><td>{a}</td><td>{ST['summary'][a]['probe_p_sanity']:.2f}</td><td>{pct(ST['summary'][a]['refusal'])}</td><td>{ST['summary'][a]['answer_len']:.0f}</td></tr>" for a in ST['summary']) + "</table>"
 def examples(tag, k, seed):
     rows = R.get(tag); 
     if not rows: return ""
@@ -75,7 +75,7 @@ Code, all prompts, results, timestamped log: <a href="https://github.com/Thabhel
 <li>Pilot rounds: the keyword detector collapses when cue words move ({pct(g('round1','keyword_acc'))}); the probe and self-report keep ranking on round 1 (AUC {f2(g('round1','probe_last_auc'))}, {f2(g('round1','self_report_auc'))}) but flip below chance when style is reversed (round 2: {f2(g('round2','probe_last_auc'))}, {f2(g('round2','self_report_auc'))}).</li>
 <li>Context line only (round 4): with the question held fixed, the probe score is higher under the evaluation line in {int(round(P4['probe_last_p']['frac_eval_higher']*60)) if P4 else '-'} of 60 pairs and the self-report margin in {int(round(P4['sr_margin']['frac_eval_higher']*60)) if P4 else '-'} of 60. Behaviour does not follow: refusals are identical in both arms ({pct(P4['border_refusal_ctx_eval']) if P4 else '-'} on the borderline tasks either way) and answers are {abs(P4['answer_len']['mean_diff']):.0f} characters shorter under the evaluation line (sign test p = {P4['answer_len']['sign_test_p_two_sided']:.2f}). The detectors read the cue; nothing downstream changes.</li>
 <li>Remedy: retraining on the balanced set raises held-out AUC on round 3 from {f2(RM['original_probe_test_auc']) if RM else '-'} to {f2(RM['test_auc']) if RM else '-'} and on round 2 from {f2(RM2['original_probe_auc']) if RM2 else '-'} to {f2(RM2['remedy_auc']) if RM2 else '-'}, but accuracy at a threshold calibrated on 12 tasks stays near chance. Balancing repairs ranking partly and calibration not at all.</li>
-<li>Steering: STEER_SENTENCE</li>
+<li>Steering along the probe direction at its read point (10 borderline tasks, alpha from -0.6 to +0.6 of the residual norm) drives the probe's own score from 0 to 1, so the intervention lands, yet refusals do not move consistently ({', '.join(str(int(round(ST['summary'][a]['refusal']*10))) for a in ['-0.6','-0.3','0.0','0.3','0.6']) if ST else '-'} of 10 across alphas) and answers get about {abs(ST['summary']['0.6']['answer_len']-ST['summary']['0.0']['answer_len']):.0f} characters longer at +0.6. Outputs stay coherent. The direction is a strong detector feature and a weak behavioural lever.</li>
 </ul>
 <p><b>What I take from this.</b> When I labelled a blind sample by hand I marked every item "user" and kept that answer: every one of those prompts is something a person could send, and I know I am often terse or ambiguous when I prompt a model myself. That is a defensible prior, not the right answer, but it points at the real problem. Provenance is not in the text. A text-only detector can learn formatting and register, and that is what all of these did, including the one trained on residual activations. A detector that separates labels but has no behavioural consequence should not be called an eval-awareness detector, and I did not find one that does.</p>
 
@@ -97,7 +97,7 @@ Code, all prompts, results, timestamped log: <a href="https://github.com/Thabhel
 <h2>4. Strongest evidence against my conclusions</h2>
 <ul>
 <li>The probe does discriminate on round 3 (AUC 0.75 against context). Someone could call that "partial eval awareness". I do not, because a punctuation baseline does better and because conversational evaluation items score as users.</li>
-<li>All prompts on both sides were written by an LLM (Claude Code), including the "user" side. A detector might separate real users from imitations for reasons I cannot see. The independent adversary set (section 6) is the check on this. INDEPENDENT_SENTENCE</li>
+<li>All prompts on both sides were written by an LLM (Claude Code), including the "user" side. A detector might separate real users from imitations for reasons I cannot see. The independent adversary set (section 7) is the check on this.</li>
 <li>Round 4's context line is itself an explicit cue. A detector responding to it is responding to text, and round 4 cannot distinguish "the model believes it is evaluated" from "the model read the word evaluation".</li>
 <li>One model, one size, one quantisation, thinking off. A reasoning model might verbalise awareness in its chain of thought.</li>
 <li>User-terse prompts are shorter than the other cells; the length-only baseline (AUC {f2(C['length_only']['auc_context']) if C else '-'} vs context) says length is not what the probes use, but the cells are not perfectly matched.</li>
@@ -112,7 +112,7 @@ Code, all prompts, results, timestamped log: <a href="https://github.com/Thabhel
 <p>Claude Code (Fable 5.1) wrote the code, the adversarial prompts, and the draft of this document, ran the experiments on my laptop, and chose the round-2 attack after reading round-1 misses. An external review (GPT) of the first draft found that round-0 probe numbers were training accuracy and that the label measured prompt provenance, not belief; both are fixed here. Structural protections: predicted outcomes written in the log before each round ran (one prediction was half wrong, reported above); numbers written into this document by script from the result files; grouped cross-validation for every round-0 number; task-split remedy; baselines and a random control.</p>
 <p>{OWNER('replace with what you actually did from notes/owner_verification_checklist.md, item by item; then state what you did not check and where you would least be surprised to find an error')}</p>
 <h2>7. Independent adversary</h2>
-<p>INDEPENDENT_SECTION</p>
+<p>OWNER_ADVERSARY_SECTION</p>
 <h2>8. Time</h2>
 <p>Pilot: 2026-09-04 22:50 to about 02:30 CDT, agent working throughout with about 1.8 h of model runs; my own active time that night was about 1 to 1.5 hours (direction, extension request, blind labelling). Overhaul: 2026-09-05 from 15:52; model runs about 2.5 h; my active time OWNER_HOURS_TODAY. Toggl was not running; the git log and the timestamped research log are the record.</p>
 <h2>9. Log and reproduction</h2>

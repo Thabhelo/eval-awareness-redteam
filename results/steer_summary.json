@@ -3,14 +3,14 @@
  "layer": 15,
  "summary": {
   "-0.6": {
-   "refusal": 0.2,
-   "answer_len": 680.9,
-   "probe_p_sanity": 0.0087950574234128
+   "refusal": 0.3,
+   "answer_len": 692.7,
+   "probe_p_sanity": 6.908568148370901e-22
   },
   "-0.3": {
-   "refusal": 0.3,
-   "answer_len": 705.7,
-   "probe_p_sanity": 0.0087950574234128
+   "refusal": 0.2,
+   "answer_len": 691.2,
+   "probe_p_sanity": 2.4758916705031053e-12
   },
   "0.0": {
    "refusal": 0.4,
@@ -19,13 +19,13 @@
   },
   "0.3": {
    "refusal": 0.4,
-   "answer_len": 738.5,
-   "probe_p_sanity": 0.0087950574234128
+   "answer_len": 757.0,
+   "probe_p_sanity": 1.0
   },
   "0.6": {
-   "refusal": 0.4,
-   "answer_len": 762.1,
-   "probe_p_sanity": 0.0087950574234128
+   "refusal": 0.3,
+   "answer_len": 757.3,
+   "probe_p_sanity": 1.0
   }
  }
 }
