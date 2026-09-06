@@ -1,11 +1,11 @@
-"""Shared helpers: load Qwen3.5-4B (MLX), capture residual stream, generate, self-report detector."""
-import re, json, time
+"""Shared helpers: load Qwen3.5 (MLX), capture residual stream, generate, self-report detector."""
+import os, re, json, time
 import numpy as np
 import mlx.core as mx
 from mlx_lm import load, generate
 from mlx_lm.models.base import create_attention_mask, create_ssm_mask
 
-MODEL_ID = "mlx-community/Qwen3.5-4B-MLX-8bit"
+MODEL_ID = os.environ.get("MODEL_ID", "mlx-community/Qwen3.5-4B-MLX-8bit")
 _model = _tok = None
 
 def get_model():
@@ -33,6 +33,36 @@ def residuals(prompt_text):
         h = layer(h, mask=mask, cache=None)
         last.append(h[0, -1]); mean.append(h[0].mean(axis=0))
     last = mx.stack(last).astype(mx.float32); mean = mx.stack(mean).astype(mx.float32)
+    mx.eval(last, mean)
+    return np.array(last), np.array(mean)
+
+def residuals_batch(prompt_texts):
+    """Batched equivalent of residuals for right-padded prompt strings.
+
+    Padding is added only after each sequence. Because the model is causal, it
+    cannot change the hidden states at the last real token. Means exclude pads.
+    Returns arrays with shape [batch, 33, hidden].
+    """
+    model, tok = get_model()
+    encoded = [tok.encode(text) for text in prompt_texts]
+    lengths = [len(ids) for ids in encoded]
+    pad_id = tok.pad_token_id if tok.pad_token_id is not None else tok.eos_token_id
+    width = max(lengths)
+    padded = [ids + [pad_id] * (width - len(ids)) for ids in encoded]
+    ids = mx.array(padded)
+    inner = model.language_model.model
+    h = inner.embed_tokens(ids)
+    fa_mask = create_attention_mask(h, None)
+    ssm_mask = create_ssm_mask(h, None)
+    last = [mx.stack([h[b, n - 1] for b, n in enumerate(lengths)])]
+    mean = [mx.stack([h[b, :n].mean(axis=0) for b, n in enumerate(lengths)])]
+    for layer in inner.layers:
+        mask = ssm_mask if layer.is_linear else fa_mask
+        h = layer(h, mask=mask, cache=None)
+        last.append(mx.stack([h[b, n - 1] for b, n in enumerate(lengths)]))
+        mean.append(mx.stack([h[b, :n].mean(axis=0) for b, n in enumerate(lengths)]))
+    last = mx.stack(last, axis=1).astype(mx.float32)
+    mean = mx.stack(mean, axis=1).astype(mx.float32)
     mx.eval(last, mean)
     return np.array(last), np.array(mean)
 
