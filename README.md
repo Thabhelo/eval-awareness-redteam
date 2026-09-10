@@ -40,8 +40,6 @@ The label is **prompt provenance**, not a human-like belief inside the model. Th
 - External audit: 1,000 deterministic English WildChat first-user turns and 100 prompts each from MMLU, ARC-Challenge, and GSM8K.
 - Comparators: a style-balanced residual probe; embedding and mean-pool probes; self-report; format, character n-gram, length, and keyword baselines.
 - Audit outputs: TPR, FPR, exact binomial intervals, precision reweighted to 0.1%, 1%, 5%, and 10% prevalence, alerts per 10,000 cases, and a fixed real-traffic calibration split.
-- Pre-registration and caught failures: [`notes/research_log.md`](notes/research_log.md).
-- Prior-art boundary: [`notes/prior_art_and_scope.md`](notes/prior_art_and_scope.md).
 
 ## Reproduce the rare-event audit
 
@@ -67,7 +65,6 @@ The round-5 data file has SHA-256 `376bba7d3cd4d44406f82156d7313f4371436dc32b39e
 - `data/`: synthetic prompt sets plus round-5 source metadata and selected row indices.
 - `results/`: summary metrics. Raw round-5 user text, scored rows, and activation archives are excluded.
 - `figures/`: generated application figures.
-- `notes/`: timestamped decisions, prior-art scope, qualitative audits, and the owner's final verification checklist.
 
 ## Sources
 

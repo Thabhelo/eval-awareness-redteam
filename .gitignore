@@ -9,3 +9,5 @@ results/round5_outputs.json
 results/round5.log
 results/round5_self_report.log
 notes/round5_qualitative_audit.md
+notes/
+results/writeup*.html
